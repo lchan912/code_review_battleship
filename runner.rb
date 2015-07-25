@@ -1,5 +1,5 @@
-require_relative 'controller.rb'
+  require_relative 'controller.rb'
 
-battleship = Battleship.new
+  battleship = Battleship.new
 
-battleship.launch
+  battleship.launch
