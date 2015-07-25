@@ -14,7 +14,6 @@ class Ships
 			fleet
 		end
 	end
-
 end
 
 class Board
@@ -25,38 +24,58 @@ class Board
 		@name = name
 	end
 
-	def generate_board
-		format = <<-FORMAT
-
-	A   B   C   D   E   F   G   H   I   J
-   +---------------------------------------+
- 1 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 2 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 3 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 4 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 5 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 6 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 7 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 8 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
- 9 | O | O | O | O | O | O | O | O | O | O |
-   |---|---|---|---|---|---|---|---|---|---|
-10 | O | O | O | O | O | O | O | O | O | O |
-   +---------------------------------------+
-					FORMAT
-
-		board_string.chars.each do |cell|
-			format = format.sub("O", cell)
+	def fire(player, board_string, cell_index)
+		if board_string[cell_index] == "H" || board_string[cell_index] == "M"
+			puts "#{player.name}, try again."
+			play(player, board_string)
+		elsif hit_ship?(player, cell_index)
+			puts "Yay, #{player.name} shot a ship!"
+			board_string[cell_index] = "H"
+		else
+			puts "Boo. #{player.name} missed!"
+			board_string[cell_index] = "M"
 		end
-		puts
-		puts "#{name}'s board  #{format}"
 	end
 
+	def play (player, board_string)
+		cell_index = obtain_index(player)
+		fire(player, board_string, cell_index)
+		player.generate_board
+	end
+
+	def obtain_index(player)
+		if player == enemy
+			rand(0..100)
+		else
+			obtain_player_input
+		end
+	end
+
+	def sunk_ship?(ship)
+		puts "Sunk ship!" if ship == [0, 0, 0]
+	end
+
+	def hit_ship?(player, cell_index)
+		if player == @enemy
+			opponent_ships = home_s.fleet
+		else
+			opponent_ships = enemy_s.fleet
+		end
+
+		(0...3).each do |ship|
+			valid_target = opponent_ships[ship].index(cell_index)
+
+			if valid_target
+				p opponent_ships[ship][valid_target]
+				opponent_ships[ship][valid_target] = 0
+				sunk_ship?(opponent_ships[ship])
+				return true
+			end
+		end
+		false
+	end
+
+	def lose?
+		home_s.fleet == Array.new(3){[0,0,0]}
+	end
 end
